@@ -107,4 +107,25 @@ public class Launcher : MonoBehaviourPunCallbacks
             playerObj.transform.Translate(location);
         }
     }
+
+    public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
+    {
+        base.OnPlayerEnteredRoom(newPlayer);
+
+        var properties = newPlayer.CustomProperties;
+        Vector3 location = new Vector3();
+        properties.TryGetValue(PlayerLocation, out location);
+
+        playerData[newPlayer.UserId] = createPlayer(playerID: newPlayer.UserId, location: location);
+    }
+
+    public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
+    {
+        base.OnPlayerLeftRoom(otherPlayer);
+
+        var playerObj = playerData[otherPlayer.UserId];
+        Destroy(playerObj);
+
+        playerData.Remove(otherPlayer.UserId);
+    }
 }
