@@ -49,6 +49,7 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
         customProperties.TryAdd(KEY_playerMoveData, new PlayerMove(userID, velocity, angularVelocity));
         customProperties.TryAdd(KEY_playerLocation, location);
 
+        Debug.Log("playerMove " + customProperties);
         PhotonNetwork.LocalPlayer.CustomProperties = customProperties;
     }
 
@@ -142,6 +143,7 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
     public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
     {
         base.OnPlayerEnteredRoom(newPlayer);
+        clientCallback.onPlayerJoinedRoom(player: new PlayerInfo(userID: newPlayer.UserId, location: new Vector3()));
     }
 
     public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
@@ -154,15 +156,19 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
     {
         base.OnPlayerPropertiesUpdate(targetPlayer, changedProps);
 
+        Debug.Log("OnPlayerPropertiesUpdate : UserId" + targetPlayer.UserId);
+
         if (targetPlayer.UserId != getUserID() && changedProps.ContainsKey(KEY_action))
         {
             var action = changedProps[KEY_action];
+            Debug.Log("OnPlayerPropertiesUpdate : actiactionon" + action);
 
             switch (action)
             {
                 case ACTION_playerMove:
                     PlayerMove playerData = new PlayerMove();
                     changedProps.TryGetValue(KEY_playerMoveData, out playerData);
+                    Debug.Log("OnPlayerPropertiesUpdate : playerData" + playerData);
                     if (playerData.userId != null && playerData.userId != "")
                     {
                         clientCallback.onOtherPlayerMove(
