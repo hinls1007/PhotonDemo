@@ -50,7 +50,7 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
         customProperties.TryAdd(KEY_playerLocation, location);
 
         Debug.Log("playerMove " + customProperties);
-        PhotonNetwork.LocalPlayer.CustomProperties = customProperties;
+        PhotonNetwork.LocalPlayer.SetCustomProperties(customProperties);
     }
 
     public void objectMove(string triggerByID, string targetObjectID, Vector3 velocity = default, Vector3 angularVelocity = default)
@@ -59,7 +59,7 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
         customProperties.TryAdd(KEY_action, ACTION_playerMove);
         customProperties.TryAdd(KEY_playerMoveData, new ObjectMove(triggerByID, targetObjectID, velocity, angularVelocity));
 
-        PhotonNetwork.LocalPlayer.CustomProperties = customProperties;
+        PhotonNetwork.LocalPlayer.SetCustomProperties(customProperties);
     }
 
     public void connectServer()
