@@ -37,6 +37,11 @@ namespace MultiPlayer
             return getUserID() == userID;
         }
 
+        public bool isHostPlayer()
+        {
+            return client.isHostPlayer();
+        }
+
         public string getUserID()
         {
             return client.getUserID();
@@ -67,18 +72,21 @@ namespace MultiPlayer
             return client.getPlayerList();
         }
 
+        public void initRoomInfo(RoomInfo roomInfo)
+        {
+            client.initRoomInfo(roomInfo: roomInfo);
+        }
+
         public void playerMove(string userID, Vector3 location, Vector3 velocity = new Vector3(), Vector3 angularVelocity = new Vector3())
         {
             client.playerMove(userID: userID, location: location, velocity: velocity, angularVelocity: angularVelocity);
         }
 
-        public void objectMove(string triggerByID, string targetObjectID, Vector3 velocity = new Vector3(), Vector3 angularVelocity = new Vector3())
+        public void objectMove(string triggerByID, RoomItem item)
         {
             client.objectMove(
                 triggerByID: triggerByID,
-                targetObjectID: targetObjectID,
-                velocity: velocity,
-                angularVelocity: angularVelocity);
+                item: item);
         }
 
         public void onConnectedServer()
@@ -97,11 +105,11 @@ namespace MultiPlayer
             }
         }
 
-        public void onOtherObjectMove(string triggerByID, string targetObjectID, Vector3 velocity = default, Vector3 angularVelocity = default)
+        public void onOtherObjectMove(string triggerByID, RoomItem item)
         {
             foreach (var callback in callbackSet)
             {
-                callback.onOtherObjectMove(triggerByID: triggerByID, targetObjectID: targetObjectID, velocity: velocity, angularVelocity: angularVelocity);
+                callback.onOtherObjectMove(triggerByID: triggerByID, item: item);
             }
         }
 
@@ -129,11 +137,12 @@ namespace MultiPlayer
             }
         }
 
-        public void onRoomJoined()
+        public void onRoomJoined(RoomInfo roomInfo)
         {
+            Debug.Log("Manager OnJoinedRoom");
             foreach (var callback in callbackSet)
             {
-                callback.onRoomJoined();
+                callback.onRoomJoined(roomInfo: roomInfo);
             }
         }
 
@@ -169,11 +178,11 @@ namespace MultiPlayer
         public virtual void onConnectServerError() { }
         public virtual void onRoomCreated() { }
         public virtual void onRoomCreatError() { }
-        public virtual void onRoomJoined() { }
+        public virtual void onRoomJoined(RoomInfo roomInfo) { }
         public virtual void onRoomJoinFail() { }
 
         public virtual void onOtherPlayerMove(string userID, Vector3 velocity = new Vector3(), Vector3 angularVelocity = new Vector3()) { }
-        public virtual void onOtherObjectMove(string triggerByID, string targetObjectID, Vector3 velocity = new Vector3(), Vector3 angularVelocity = new Vector3()) { }
+        public virtual void onOtherObjectMove(string triggerByID, RoomItem item) { }
 
         public virtual void onPlayerJoinedRoom(PlayerInfo player) { }
         public virtual void onPlayerLeftRoom(string userID) { }
@@ -188,6 +197,41 @@ namespace MultiPlayer
         {
             this.userID = userID;
             this.location = location;
+        }
+    }
+
+    public class RoomInfo
+    {
+        public List<RoomItem> roomItemList;
+
+        public RoomInfo()
+        {
+            this.roomItemList = new List<RoomItem>();
+        }
+
+        public RoomInfo(List<RoomItem> roomItemList)
+        {
+            this.roomItemList = roomItemList;
+        }
+    }
+
+    public class RoomItem
+    {
+        public string itemID;
+        public string itemTypeID;
+        public Vector3 location;
+        public Quaternion rotation;
+        public Vector3 currentVelocity;
+        public Vector3 currentAngularVelocity;
+
+        public RoomItem(string itemID, string itemTypeID, Vector3 location = new Vector3(), Quaternion rotation = new Quaternion(), Vector3 currentVelocity = new Vector3(), Vector3 currentAngularVelocity = new Vector3())
+        {
+            this.itemID = itemID;
+            this.itemTypeID = itemTypeID;
+            this.location = location;
+            this.rotation = rotation;
+            this.currentVelocity = currentVelocity;
+            this.currentAngularVelocity = currentAngularVelocity;
         }
     }
 }

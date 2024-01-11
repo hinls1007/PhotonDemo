@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +8,7 @@ using MultiPlayer;
 public class Launcher : MonoBehaviour, MultiPlayCallback
 {
     public Dictionary<string, GameObject> playerData = new Dictionary<string, GameObject>();
+    //public Dictionary<string, GameObject> ballData = new Dictionary<string, GameObject>();
     //public Dictionary<Dictionary<int, GameObject>, Dictionary<int, GameObject>>[] playerData;
 
     public GameObject playerObj;
@@ -39,14 +41,16 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
         MultiPlayManager.Instance.createOrJoinRoom(roomName: "Ball Test");
     }
 
-    public void onRoomJoined() {
+    public void onRoomJoined(RoomInfo roomInfo) {
         generateGameObj();
+        generateBallObj(roomInfo: roomInfo);
     }
 
     private void generateGameObj()
     {
         playerData.Clear();
         var playerList = MultiPlayManager.Instance.getPlayerList();
+        Debug.Log("PlayerList : " + playerList.Count);
         
         foreach (var player in playerList)
         {
@@ -65,6 +69,47 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
         {
             playerScript.playerID = playerID;
         }
+        return obj;
+    }
+
+    private void generateBallObj(RoomInfo roomInfo)
+    {
+        RoomInfo room = roomInfo;
+        Debug.Log("generateBallObj : " + room);
+        if (MultiPlayManager.Instance.isHostPlayer())
+        {
+            room = new RoomInfo();
+
+            for (int index = 0; index < 2; index++)
+            {
+                var itemID = Guid.NewGuid().ToString();
+                var roomItem = new RoomItem(
+                    itemID: itemID,
+                    itemTypeID: "ball",
+                    location: new Vector3(index, 1, index),
+                    rotation: new Quaternion(),
+                    currentVelocity: Vector3.zero,
+                    currentAngularVelocity: Vector3.zero
+                    );
+                room.roomItemList.Add(roomItem);
+            }
+        }
+        if (room != null)
+        {
+            foreach(var item in room.roomItemList)
+            {
+                createBallObj(item: item);
+            }
+        }
+    }
+
+    private GameObject createBallObj(RoomItem item)
+    {
+        var obj = Instantiate(ballObj, item.location, item.rotation);
+        var ballScript = obj.GetComponent<BallTest>();
+        ballScript.itemID = item.itemID;
+        ballScript.setCurrentState(velocity: item.currentVelocity, angularVelocity: item.currentAngularVelocity);
+
         return obj;
     }
 

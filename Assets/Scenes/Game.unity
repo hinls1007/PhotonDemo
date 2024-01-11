@@ -168,7 +168,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerObj: {fileID: 8111273817380623428, guid: ebb701a1cd9674d538a0461e90f6801a, type: 3}
-  ballObj: {fileID: 0}
+  ballObj: {fileID: 7251813077438023551, guid: 94c324c38f4584b60940cd60b94e8a0d, type: 3}
   client: {fileID: 2106400698}
 --- !u!1 &1503205439
 GameObject:

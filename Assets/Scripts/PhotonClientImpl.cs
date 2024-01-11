@@ -25,13 +25,19 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
         this.clientCallback = clientCallback;
 
         PhotonPeer.RegisterType(typeof(PlayerMove), (byte)'A', PlayerMove.SerializeMethod, PlayerMove.DeserializeMethod);
-        var registered = PhotonPeer.RegisterType(typeof(ObjectMove), (byte)'B', ObjectMove.SerializeMethod, ObjectMove.DeserializeMethod);
+        PhotonPeer.RegisterType(typeof(ObjectMove), (byte)'B', ObjectMove.SerializeMethod, ObjectMove.DeserializeMethod);
+        var registered = PhotonPeer.RegisterType(typeof(RoomItem), (byte)'C', PhotonSerialize.RoomItemSerializeMethod, PhotonSerialize.RoomItemDeserializeMethod);
         Debug.Log("registered: " + registered);
     }
 
     public string getUserID()
     {
         return PhotonNetwork.LocalPlayer.UserId;
+    }
+
+    public bool isHostPlayer()
+    {
+        return PhotonNetwork.MasterClient.UserId == getUserID();
     }
 
     public List<PlayerInfo> getPlayerList()
@@ -59,13 +65,17 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
         PhotonNetwork.LocalPlayer.SetCustomProperties(customProperties);
     }
 
-    public void objectMove(string triggerByID, string targetObjectID, Vector3 velocity = default, Vector3 angularVelocity = default)
+    public void objectMove(string triggerByID, RoomItem item)
     {
-        var customProperties = PhotonNetwork.LocalPlayer.CustomProperties;
-        customProperties.TryAdd(KEY_action, ACTION_playerMove);
-        customProperties.TryAdd(KEY_playerMoveData, new ObjectMove(triggerByID, targetObjectID, velocity, angularVelocity));
+        var properties = PhotonNetwork.CurrentRoom.CustomProperties;
+        properties.TryAdd(item.itemID, item);
 
-        PhotonNetwork.LocalPlayer.SetCustomProperties(customProperties);
+        PhotonNetwork.CurrentRoom.SetCustomProperties(properties);
+        //var customProperties = PhotonNetwork.LocalPlayer.CustomProperties;
+        //customProperties.TryAdd(KEY_action, ACTION_playerMove);
+        //customProperties.TryAdd(KEY_playerMoveData, new ObjectMove(triggerByID, targetObjectID, velocity, angularVelocity));
+
+        //PhotonNetwork.LocalPlayer.SetCustomProperties(customProperties);
     }
 
     public void connectServer()
@@ -93,11 +103,22 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
 
     public void createOrJoinRoom(string roomName, string password)
     {
+        Debug.Log("createOrJoinRoom");
         RoomOptions options = new RoomOptions();
         options.MaxPlayers = 5;
         options.PublishUserId = true;
         options.CleanupCacheOnLeave = true;
         PhotonNetwork.JoinOrCreateRoom(roomName, options, TypedLobby.Default);
+    }
+
+    public void initRoomInfo(MultiPlayer.RoomInfo roomInfo)
+    {
+        var properties = PhotonNetwork.CurrentRoom.CustomProperties;
+        foreach (var room in roomInfo.roomItemList)
+        {
+            properties.TryAdd(room.itemID, room);
+        }
+        PhotonNetwork.CurrentRoom.SetCustomProperties(properties);
     }
 
     public override void OnConnectedToMaster()
@@ -123,7 +144,26 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
     public override void OnJoinedRoom()
     {
         base.OnJoinedRoom();
-        clientCallback.onRoomJoined();
+
+        var properties = PhotonNetwork.CurrentRoom.CustomProperties;
+
+        List<RoomItem> itemList = new List<RoomItem>();
+        foreach (var value in properties.Values)
+        {
+            var item = value as RoomItem;
+
+            if (item != null)
+            {
+                itemList.Add(item);
+            }
+        }
+
+        MultiPlayer.RoomInfo roomInfo = null;
+        if (itemList.Count > 0)
+        {
+            roomInfo = new MultiPlayer.RoomInfo(roomItemList: itemList);
+        }
+        clientCallback.onRoomJoined(roomInfo: roomInfo);
         Debug.Log("OnJoinedRoom");
     }
 
@@ -184,24 +224,39 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
                         );
                     }
                     break;
-                case ACTION_objectMove:
-                    ObjectMove objectData = new ObjectMove();
+                //case ACTION_objectMove:
+                //    ObjectMove objectData = new ObjectMove();
 
-                    changedProps.TryGetValue(KEY_objectMoveData, out objectData);
-                    if (objectData.targetObjectID != null && objectData.targetObjectID != "")
-                    {
-                        clientCallback.onOtherObjectMove(
-                            triggerByID: objectData.triggerByID,
-                            targetObjectID: objectData.targetObjectID,
-                            velocity: objectData.velocity,
-                            angularVelocity: objectData.angularVelocity
-                        );
-                    }
-                    break;
+                //    changedProps.TryGetValue(KEY_objectMoveData, out objectData);
+                //    if (objectData.targetObjectID != null && objectData.targetObjectID != "")
+                //    {
+                //        clientCallback.onOtherObjectMove(
+                //            triggerByID: objectData.triggerByID,
+                //            targetObjectID: objectData.targetObjectID,
+                //            velocity: objectData.velocity,
+                //            angularVelocity: objectData.angularVelocity
+                //        );
+                //    }
+                //    break;
                 default:
                     break;
             }
 
+        }
+    }
+
+    public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+    {
+        base.OnRoomPropertiesUpdate(propertiesThatChanged);
+
+        foreach(var value in propertiesThatChanged.Values)
+        {
+            var item = value as RoomItem;
+
+            if (item != null)
+            {
+                clientCallback.onOtherObjectMove("", item);
+            }
         }
     }
 
@@ -257,6 +312,22 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
         {
             var json = Encoding.ASCII.GetString(serializedCustomObject);
             ObjectMove obj = JsonUtility.FromJson<ObjectMove>(json);
+            return obj;
+        }
+    }
+
+    class PhotonSerialize
+    {
+        public static byte[] RoomItemSerializeMethod(object customObject)
+        {
+            var json = JsonUtility.ToJson((RoomItem)customObject);
+            var jsonByte = Encoding.ASCII.GetBytes(json);
+            return jsonByte;
+        }
+        public static object RoomItemDeserializeMethod(byte[] serializedCustomObject)
+        {
+            var json = Encoding.ASCII.GetString(serializedCustomObject);
+            RoomItem obj = JsonUtility.FromJson<RoomItem>(json);
             return obj;
         }
     }
