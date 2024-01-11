@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text;
 
 using Photon.Pun;
 using Photon.Realtime;
+using ExitGames.Client.Photon;
 using ExitGames.Client.Photon.StructWrapping;
 using MultiPlayer;
 public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
@@ -21,6 +23,10 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
     public void init(MultiPlayClientCallback clientCallback)
     {
         this.clientCallback = clientCallback;
+
+        PhotonPeer.RegisterType(typeof(PlayerMove), (byte)'A', PlayerMove.SerializeMethod, PlayerMove.DeserializeMethod);
+        var registered = PhotonPeer.RegisterType(typeof(ObjectMove), (byte)'B', ObjectMove.SerializeMethod, ObjectMove.DeserializeMethod);
+        Debug.Log("registered: " + registered);
     }
 
     public string getUserID()
@@ -211,6 +217,19 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
             this.velocity = velocity;
             this.angularVelocity = angularVelocity;
         }
+
+        public static byte[] SerializeMethod(object customObject)
+        {
+            var json = JsonUtility.ToJson((PlayerMove) customObject);
+            var jsonByte = Encoding.ASCII.GetBytes(json);
+            return jsonByte;
+        }
+        public static object DeserializeMethod(byte[] serializedCustomObject)
+        {
+            var json = Encoding.ASCII.GetString(serializedCustomObject);
+            PlayerMove obj = JsonUtility.FromJson<PlayerMove>(json);
+            return obj;
+        }
     }
 
     struct ObjectMove
@@ -226,6 +245,19 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
             this.targetObjectID = targetObjectID;
             this.velocity = velocity;
             this.angularVelocity = angularVelocity;
+        }
+
+        public static byte[] SerializeMethod(object customObject)
+        {
+            var json = JsonUtility.ToJson((ObjectMove)customObject);
+            var jsonByte = Encoding.ASCII.GetBytes(json);
+            return jsonByte;
+        }
+        public static object DeserializeMethod(byte[] serializedCustomObject)
+        {
+            var json = Encoding.ASCII.GetString(serializedCustomObject);
+            ObjectMove obj = JsonUtility.FromJson<ObjectMove>(json);
+            return obj;
         }
     }
 }
