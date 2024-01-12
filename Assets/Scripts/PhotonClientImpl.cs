@@ -309,17 +309,21 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
 
     struct ObjectMove
     {
-        public string triggerByID;
-        public string targetObjectID;
-        public Vector3 velocity;
-        public Vector3 angularVelocity;
+        public string itemID;
+        public string itemTypeID;
+        public Vector3 location;
+        public Quaternion rotation;
+        public Vector3 currentVelocity;
+        public Vector3 currentAngularVelocity;
 
-        public ObjectMove(string triggerByID, string targetObjectID, Vector3 velocity, Vector3 angularVelocity)
+        public ObjectMove(string itemID, string itemTypeID, Vector3 location, Quaternion rotation, Vector3 currentVelocity, Vector3 currentAngularVelocity)
         {
-            this.triggerByID = triggerByID;
-            this.targetObjectID = targetObjectID;
-            this.velocity = velocity;
-            this.angularVelocity = angularVelocity;
+            this.itemID = itemID;
+            this.itemTypeID = itemTypeID;
+            this.location = location;
+            this.rotation = rotation;
+            this.currentVelocity = currentVelocity;
+            this.currentAngularVelocity = currentAngularVelocity;
         }
 
         public static byte[] SerializeMethod(object customObject)

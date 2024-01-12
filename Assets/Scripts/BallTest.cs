@@ -29,10 +29,12 @@ public class BallTest : MonoBehaviour, MultiPlayCallback
         }
     }
 
-    public void setCurrentState(Vector3 velocity, Vector3 angularVelocity)
+    public void setCurrentState(RoomItem item)
     {
-        rb.velocity = velocity;
-        rb.angularVelocity = angularVelocity;
+        transform.position = item.location;
+        transform.rotation = item.rotation;
+        //rb.velocity = velocity;
+        //rb.angularVelocity = angularVelocity;
     }
 
     public void onOtherObjectMove(
@@ -41,7 +43,7 @@ public class BallTest : MonoBehaviour, MultiPlayCallback
     {
         if (item.itemID == itemID)
         {
-            setCurrentState(velocity: item.currentVelocity, angularVelocity: item.currentAngularVelocity);
+            setCurrentState(item: item);
         }
     }
 }

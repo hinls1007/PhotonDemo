@@ -130,7 +130,7 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
         var obj = Instantiate(ballObj, item.location, item.rotation);
         var ballScript = obj.GetComponent<BallTest>();
         ballScript.itemID = item.itemID;
-        ballScript.setCurrentState(velocity: item.currentVelocity, angularVelocity: item.currentAngularVelocity);
+        ballScript.setCurrentState(item: item);
 
         return obj;
     }
@@ -141,7 +141,7 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
 
     public void onPlayerLeftRoom(string userID) {
         var playerObj = playerData[userID];
-        Destroy(playerObj);
+        Destroy(playerObj.gameObject);
 
         playerData.Remove(userID);
     }
