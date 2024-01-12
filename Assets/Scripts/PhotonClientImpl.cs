@@ -54,12 +54,12 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
         ).ToList();
     }
 
-    public void playerMove(string userID, Vector3 location = default, Vector3 velocity = default, Vector3 angularVelocity = default)
+    public void playerMove(string userID, Vector3 location, Vector3 velocity, Vector3 angularVelocity)
     {
         var customProperties = PhotonNetwork.LocalPlayer.CustomProperties;
-        customProperties.TryAdd(KEY_action, ACTION_playerMove);
-        customProperties.TryAdd(KEY_playerMoveData, new PlayerMove(userID, velocity, angularVelocity));
-        customProperties.TryAdd(KEY_playerLocation, location);
+        customProperties[KEY_action] = ACTION_playerMove;
+        customProperties[KEY_playerMoveData] = new PlayerMove(userID, velocity, angularVelocity);
+        customProperties[KEY_playerLocation] = location;
 
         Debug.Log("playerMove " + customProperties);
         PhotonNetwork.LocalPlayer.SetCustomProperties(customProperties);
@@ -68,14 +68,9 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
     public void objectMove(string triggerByID, RoomItem item)
     {
         var properties = PhotonNetwork.CurrentRoom.CustomProperties;
-        properties.TryAdd(item.itemID, item);
+        properties[item.itemID] = item;
 
         PhotonNetwork.CurrentRoom.SetCustomProperties(properties);
-        //var customProperties = PhotonNetwork.LocalPlayer.CustomProperties;
-        //customProperties.TryAdd(KEY_action, ACTION_playerMove);
-        //customProperties.TryAdd(KEY_playerMoveData, new ObjectMove(triggerByID, targetObjectID, velocity, angularVelocity));
-
-        //PhotonNetwork.LocalPlayer.SetCustomProperties(customProperties);
     }
 
     public void connectServer()
@@ -116,7 +111,7 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
         var properties = PhotonNetwork.CurrentRoom.CustomProperties;
         foreach (var room in roomInfo.roomItemList)
         {
-            properties.TryAdd(room.itemID, room);
+            properties[room.itemID] = room;
         }
         PhotonNetwork.CurrentRoom.SetCustomProperties(properties);
     }

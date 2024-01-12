@@ -55,8 +55,9 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
         foreach (var player in playerList)
         {
             Debug.Log("generateGameObj : " + player.userID);
+            
 
-            playerData[player.userID] = createPlayer(playerID: player.userID, location: new Vector3());
+            playerData[player.userID] = createPlayer(playerID: player.userID, location: player.location);
         }
     }
 

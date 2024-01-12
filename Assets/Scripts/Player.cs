@@ -20,7 +20,7 @@ public class Player : MonoBehaviour, MultiPlayCallback
         {
             MultiPlayManager.Instance.playerMove(
                 userID: playerID,
-                location: rigidbody.transform.position,
+                location: transform.position,
                 velocity: rigidbody.velocity,
                 angularVelocity: rigidbody.angularVelocity
             );
