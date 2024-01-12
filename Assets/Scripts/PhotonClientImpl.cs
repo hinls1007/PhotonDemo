@@ -63,10 +63,10 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
 
     public void playerMove(PlayerInfo playerInfo)
     {
-        if (playerInfo.currentVelocity == Vector3.zero && playerInfo.currentAngularVelocity == Vector3.zero)
-        {
-            return;
-        }
+        //if (playerInfo.currentVelocity == Vector3.zero && playerInfo.currentAngularVelocity == Vector3.zero)
+        //{
+        //    return;
+        //}
         var customProperties = PhotonNetwork.LocalPlayer.CustomProperties;
         customProperties[KEY_action] = ACTION_playerMove;
         customProperties[KEY_playerMoveData] = new PlayerMove(
