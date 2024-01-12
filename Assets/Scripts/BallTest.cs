@@ -20,8 +20,8 @@ public class BallTest : MonoBehaviour, MultiPlayCallback
             var item = new RoomItem(
                 itemID: itemID,
                 itemTypeID: "ball",
-                location: rb.position,
-                rotation: rb.rotation,
+                location: transform.position,
+                rotation: transform.rotation,
                 currentVelocity: rb.velocity,
                 currentAngularVelocity: rb.angularVelocity
                 );
