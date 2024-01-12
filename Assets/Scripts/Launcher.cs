@@ -7,7 +7,7 @@ using MultiPlayer;
 
 public class Launcher : MonoBehaviour, MultiPlayCallback
 {
-    public Dictionary<string, GameObject> playerData = new Dictionary<string, GameObject>();
+    public Dictionary<string, Player> playerData = new Dictionary<string, Player>();
     //public Dictionary<string, GameObject> ballData = new Dictionary<string, GameObject>();
     //public Dictionary<Dictionary<int, GameObject>, Dictionary<int, GameObject>>[] playerData;
 
@@ -20,6 +20,27 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
         MultiPlayManager.init(client);
         MultiPlayManager.Instance.registerCallback(this);
         MultiPlayManager.Instance.connectServer();
+
+        Debug.Log("Test Json");
+        var json = "{\"userId\":\"0baf6c6a-8dfe-49af-9701-80d174d8f729\",\"velocity\":{\"x\":-0.2058689147233963,\"y\":0.9021569490432739,\"z\":0.1355285346508026},\"angularVelocity\":{\"x\":-0.18757937848567964,\"y\":-0.07084726542234421,\"z\":0.47557929158210757}}";
+        PhotonClientImpl.PlayerMove newObj = JsonUtility.FromJson<PhotonClientImpl.PlayerMove>(json); 
+        //var test = new Test(new Vector3(10, 0, 10));
+        //Debug.Log("Test Json obj Bef " + test.location);
+        //var json = JsonUtility.ToJson(test);
+        //Debug.Log("Test Json obj json" + json);
+        //var newObj = JsonUtility.FromJson<Test>(json);
+        Debug.Log("Test Json new obj json " + newObj.userId);
+        Debug.Log("Test Json new obj json " + newObj.velocity);
+
+    }
+
+    struct Test
+    {
+        public Vector3 location;
+        public Test(Vector3 location)
+        {
+            this.location = location;
+        }
     }
 
     private void FixedUpdate()
@@ -28,8 +49,8 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
         if (userID != null
             && playerData.ContainsKey(userID))
         {
-            float x = Input.GetAxis("Horizontal") * 10f * Time.deltaTime;
-            float z = Input.GetAxis("Vertical") * 10f * Time.deltaTime;
+            float x = Input.GetAxis("Horizontal");// * 10f * Time.deltaTime;
+            float z = Input.GetAxis("Vertical"); // * 10f * Time.deltaTime;
             var newLocation = new Vector3(x, 0, z);
             var localPlayer = playerData[userID];
             localPlayer.transform.Translate(newLocation);
@@ -61,7 +82,7 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
         }
     }
 
-    private GameObject createPlayer(string playerID, Vector3 location)
+    private Player createPlayer(string playerID, Vector3 location)
     {
         var obj = Instantiate(playerObj, location, new Quaternion());
         var playerScript = obj.GetComponent<Player>();
@@ -70,7 +91,7 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
         {
             playerScript.playerID = playerID;
         }
-        return obj;
+        return playerScript;
     }
 
     private void generateBallObj(RoomInfo roomInfo)

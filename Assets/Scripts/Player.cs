@@ -18,21 +18,25 @@ public class Player : MonoBehaviour, MultiPlayCallback
     {
         if (MultiPlayManager.Instance.isLocalPlayer(userID: playerID))
         {
-            MultiPlayManager.Instance.playerMove(
+            MultiPlayManager.Instance.playerMove(playerInfo: new PlayerInfo(
                 userID: playerID,
                 location: transform.position,
-                velocity: rigidbody.velocity,
-                angularVelocity: rigidbody.angularVelocity
+                rotation: rigidbody.rotation,
+                currentVelocity: rigidbody.velocity,
+                currentAngularVelocity: rigidbody.angularVelocity
+                )
             );
         }
     }
 
-    public void onOtherPlayerMove(string userID, Vector3 velocity, Vector3 angularVelocity) {
-        if (!MultiPlayManager.Instance.isLocalPlayer(userID: userID)
-            && userID == playerID)
+    public void onOtherPlayerMove(PlayerInfo playerInfo) {
+        if (!MultiPlayManager.Instance.isLocalPlayer(userID: playerInfo.userID)
+            && playerInfo.userID == playerID)
         {
-            rigidbody.velocity = velocity;
-            rigidbody.angularVelocity = angularVelocity;
+            transform.position = playerInfo.location;
+            rigidbody.rotation = playerInfo.rotation;
+            rigidbody.velocity = playerInfo.currentVelocity;
+            rigidbody.angularVelocity = playerInfo.currentAngularVelocity;
         }
     }
 }

@@ -77,9 +77,9 @@ namespace MultiPlayer
             client.initRoomInfo(roomInfo: roomInfo);
         }
 
-        public void playerMove(string userID, Vector3 location, Vector3 velocity = new Vector3(), Vector3 angularVelocity = new Vector3())
+        public void playerMove(PlayerInfo playerInfo)
         {
-            client.playerMove(userID: userID, location: location, velocity: velocity, angularVelocity: angularVelocity);
+            client.playerMove(playerInfo: playerInfo);
         }
 
         public void objectMove(string triggerByID, RoomItem item)
@@ -113,11 +113,11 @@ namespace MultiPlayer
             }
         }
 
-        public void onOtherPlayerMove(string userID, Vector3 velocity = default, Vector3 angularVelocity = default)
+        public void onOtherPlayerMove(PlayerInfo playerInfo)
         {
             foreach (var callback in callbackSet)
             {
-                callback.onOtherPlayerMove(userID: userID, velocity: velocity, angularVelocity: angularVelocity);
+                callback.onOtherPlayerMove(playerInfo: playerInfo);
             }
         }
 
@@ -181,7 +181,7 @@ namespace MultiPlayer
         public virtual void onRoomJoined(RoomInfo roomInfo) { }
         public virtual void onRoomJoinFail() { }
 
-        public virtual void onOtherPlayerMove(string userID, Vector3 velocity = new Vector3(), Vector3 angularVelocity = new Vector3()) { }
+        public virtual void onOtherPlayerMove(PlayerInfo playerInfo) { }
         public virtual void onOtherObjectMove(string triggerByID, RoomItem item) { }
 
         public virtual void onPlayerJoinedRoom(PlayerInfo player) { }
@@ -192,11 +192,17 @@ namespace MultiPlayer
     {
         public string userID;
         public Vector3 location;
+        public Quaternion rotation;
+        public Vector3 currentVelocity;
+        public Vector3 currentAngularVelocity;
 
-        public PlayerInfo(string userID, Vector3 location)
+        public PlayerInfo(string userID, Vector3 location, Quaternion rotation, Vector3 currentVelocity, Vector3 currentAngularVelocity)
         {
             this.userID = userID;
             this.location = location;
+            this.rotation = rotation;
+            this.currentVelocity = currentVelocity;
+            this.currentAngularVelocity = currentAngularVelocity;
         }
     }
 

@@ -15,7 +15,7 @@ namespace MultiPlayer
         public string getUserID();
         public bool isHostPlayer();
         public List<PlayerInfo> getPlayerList();
-        public void playerMove(string userID, Vector3 location = new Vector3(), Vector3 velocity = new Vector3(), Vector3 angularVelocity = new Vector3());
+        public void playerMove(PlayerInfo playerInfo);
         public void objectMove(string triggerByID, RoomItem item);
         public void connectServer();
         public void createRoom(string roomName, string password);
@@ -33,7 +33,7 @@ namespace MultiPlayer
         public void onRoomJoined(RoomInfo roomInfo);
         public void onRoomJoinFail();
 
-        public void onOtherPlayerMove(string userID, Vector3 velocity = new Vector3(), Vector3 angularVelocity = new Vector3());
+        public void onOtherPlayerMove(PlayerInfo playerInfo);
         public void onOtherObjectMove(string triggerByID, RoomItem item);
         public void onPlayerJoinedRoom(PlayerInfo player);
         public void onPlayerLeftRoom(string userID);
