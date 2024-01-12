@@ -83,7 +83,14 @@ public class PhotonClientImpl: MonoBehaviourPunCallbacks, MultiPlayClient
     public void objectMove(string triggerByID, RoomItem item)
     {
         var properties = PhotonNetwork.CurrentRoom.CustomProperties;
-        properties[item.itemID] = item;
+        properties[item.itemID] = new ObjectMove(
+            itemID: item.itemID,
+            itemTypeID: item.itemTypeID,
+            location: item.location,
+            rotation: item.rotation,
+            currentVelocity: item.currentVelocity,
+            currentAngularVelocity: item.currentAngularVelocity
+            );
 
         PhotonNetwork.CurrentRoom.SetCustomProperties(properties);
     }
