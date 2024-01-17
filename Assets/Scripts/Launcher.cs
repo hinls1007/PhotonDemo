@@ -6,6 +6,11 @@ using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon.StructWrapping;
 
+public delegate void SuccessCallback(string name);
+public delegate void FailCallback(int errorCode, string errorMessage);
+public delegate void DisconnectedCallback(string message);
+public delegate void PlayerCallback(string player);
+
 public class Launcher : MonoBehaviourPunCallbacks
 {
 
@@ -15,10 +20,12 @@ public class Launcher : MonoBehaviourPunCallbacks
     //public Dictionary<Dictionary<int, GameObject>, Dictionary<int, GameObject>>[] playerData;
 
     public GameObject playerObj;
+    public Rigidbody playerRb;
 
     private string PlayerLocation = "Player_Location";
     private string PlayerRotation = "Player_Rotation";
 
+    public float movementSpeed = 10f;
 
     private void Start()
     {
@@ -32,9 +39,21 @@ public class Launcher : MonoBehaviourPunCallbacks
         if (PhotonNetwork.LocalPlayer.UserId != null
             && playerData.ContainsKey(PhotonNetwork.LocalPlayer.UserId))
         {
-            float x = Input.GetAxis("Horizontal") * 10f * Time.deltaTime;
-            float z = Input.GetAxis("Vertical") * 10f * Time.deltaTime;
-            var newLocation = new Vector3(x, 0, z);
+            //float x = Input.GetAxis("Horizontal") * 10f * Time.deltaTime;
+            //float z = Input.GetAxis("Vertical") * 10f * Time.deltaTime;
+            //var newLocation = new Vector3(x, 0, z);
+
+            //playerMovement();
+            if (Input.GetKey(KeyCode.A))
+                playerRb.AddForce(new Vector3(-movementSpeed, 0, 0));
+            if (Input.GetKey(KeyCode.D))
+                playerRb.AddForce(new Vector3(movementSpeed, 0, 0));
+            if (Input.GetKey(KeyCode.W))
+                playerRb.AddForce(new Vector3(0, 0, movementSpeed));
+            if (Input.GetKey(KeyCode.S))
+                playerRb.AddForce(new Vector3(0, 0, -movementSpeed));
+
+            var newLocation = playerObj.transform.position;
 
 
             float rotationInput = 0f;
@@ -63,6 +82,15 @@ public class Launcher : MonoBehaviourPunCallbacks
 
             Debug.Log($"Player:{PhotonNetwork.LocalPlayer.UserId}, location:{localPlayer.transform.position}, rotation:{localPlayer.transform.rotation} properties:{properties[PlayerLocation]}");
         }
+    }
+
+    public void playerMovement()
+    {
+        if (Input.GetKey(KeyCode.A))
+            playerObj.GetComponent<Rigidbody>().AddForce(new Vector3(movementSpeed, 0, 0));
+        if (Input.GetKey(KeyCode.D))
+            playerObj.GetComponent<Rigidbody>().AddForce(new Vector3(-movementSpeed, 0, 0));
+
     }
 
     public override void OnConnectedToMaster()
@@ -134,6 +162,7 @@ public class Launcher : MonoBehaviourPunCallbacks
         Debug.Log($"playerID:{playerID}, location:{location}");
         var obj = Instantiate(playerObj, location, rotation);
         var playerScript = obj.GetComponent<Player>();
+        playerRb = obj.GetComponent<Rigidbody>();
 
         if (playerScript != null)
         {
