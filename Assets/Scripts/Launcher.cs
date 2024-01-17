@@ -39,11 +39,6 @@ public class Launcher : MonoBehaviourPunCallbacks
         if (PhotonNetwork.LocalPlayer.UserId != null
             && playerData.ContainsKey(PhotonNetwork.LocalPlayer.UserId))
         {
-            //float x = Input.GetAxis("Horizontal") * 10f * Time.deltaTime;
-            //float z = Input.GetAxis("Vertical") * 10f * Time.deltaTime;
-            //var newLocation = new Vector3(x, 0, z);
-
-            //playerMovement();
             if (Input.GetKey(KeyCode.A))
                 playerRb.AddForce(new Vector3(-movementSpeed, 0, 0));
             if (Input.GetKey(KeyCode.D))
@@ -84,14 +79,6 @@ public class Launcher : MonoBehaviourPunCallbacks
         }
     }
 
-    public void playerMovement()
-    {
-        if (Input.GetKey(KeyCode.A))
-            playerObj.GetComponent<Rigidbody>().AddForce(new Vector3(movementSpeed, 0, 0));
-        if (Input.GetKey(KeyCode.D))
-            playerObj.GetComponent<Rigidbody>().AddForce(new Vector3(-movementSpeed, 0, 0));
-
-    }
 
     public override void OnConnectedToMaster()
     {
