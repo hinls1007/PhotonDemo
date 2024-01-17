@@ -2,41 +2,39 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using MultiPlayer;
+using Photon.Pun;
+using Photon.Realtime;
+using ExitGames.Client.Photon.StructWrapping;
 
-public class Launcher : MonoBehaviour, MultiPlayCallback
+public class Launcher : MonoBehaviourPunCallbacks
 {
+
+    //public DictionaryData DictData;
+
     public Dictionary<string, GameObject> playerData = new Dictionary<string, GameObject>();
     //public Dictionary<Dictionary<int, GameObject>, Dictionary<int, GameObject>>[] playerData;
 
     public GameObject playerObj;
-<<<<<<< HEAD
 
     private string PlayerLocation = "Player_Location";
     private string PlayerRotation = "Player_Rotation";
 
-=======
-    public GameObject ballObj;
-    public PhotonClientImpl client;
->>>>>>> a2b970875aa978ba20bca89d6861e55bf868934c
 
     private void Start()
     {
-        MultiPlayManager.init(client);
-        MultiPlayManager.Instance.registerCallback(this);
-        MultiPlayManager.Instance.connectServer();
+        PhotonNetwork.ConnectUsingSettings();
+        //Hashtable props = new Hashtable();
+        //PhotonNetwork.LocalPlayer.SetCustomProperties(props);
     }
 
     private void FixedUpdate()
     {
-        var userID = MultiPlayManager.Instance.getUserID();
-        if (userID != null
-            && playerData.ContainsKey(userID))
+        if (PhotonNetwork.LocalPlayer.UserId != null
+            && playerData.ContainsKey(PhotonNetwork.LocalPlayer.UserId))
         {
             float x = Input.GetAxis("Horizontal") * 10f * Time.deltaTime;
             float z = Input.GetAxis("Vertical") * 10f * Time.deltaTime;
             var newLocation = new Vector3(x, 0, z);
-<<<<<<< HEAD
 
 
             float rotationInput = 0f;
@@ -64,19 +62,19 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
             PhotonNetwork.LocalPlayer.SetCustomProperties(properties);
 
             Debug.Log($"Player:{PhotonNetwork.LocalPlayer.UserId}, location:{localPlayer.transform.position}, rotation:{localPlayer.transform.rotation} properties:{properties[PlayerLocation]}");
-=======
-            var localPlayer = playerData[userID];
-            localPlayer.transform.Translate(newLocation);
->>>>>>> a2b970875aa978ba20bca89d6861e55bf868934c
         }
     }
 
-    public void onConnectedServer()
+    public override void OnConnectedToMaster()
     {
-        MultiPlayManager.Instance.createOrJoinRoom(roomName: "Ball Test");
+        Debug.Log("Connected to Master");
+        RoomOptions options = new RoomOptions();
+        options.MaxPlayers = 5;
+        options.PublishUserId = true;
+        options.CleanupCacheOnLeave = true;
+        PhotonNetwork.JoinOrCreateRoom("RacingRoom", options, TypedLobby.Default);
     }
 
-<<<<<<< HEAD
     public override void OnCreatedRoom()
     {
         base.OnCreatedRoom();
@@ -127,22 +125,7 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
             Debug.Log($"player detail:{player}, location:{location}, rotation:{rotation}");
 
             playerData[player.UserId] = createPlayer(playerID: player.UserId, location: location, rotation:rotation);
-=======
-    public void onRoomJoined() {
-        generateGameObj();
-    }
 
-    private void generateGameObj()
-    {
-        playerData.Clear();
-        var playerList = MultiPlayManager.Instance.getPlayerList();
-        
-        foreach (var player in playerList)
-        {
-            Debug.Log("generateGameObj : " + player.userID);
->>>>>>> a2b970875aa978ba20bca89d6861e55bf868934c
-
-            playerData[player.userID] = createPlayer(playerID: player.userID, location: new Vector3());
         }
     }
 
@@ -159,7 +142,6 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
         return obj;
     }
 
-<<<<<<< HEAD
     public override void OnPlayerPropertiesUpdate(Photon.Realtime.Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
     {
 
@@ -205,16 +187,8 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
         base.OnPlayerLeftRoom(otherPlayer);
 
         var playerObj = playerData[otherPlayer.UserId];
-=======
-    public void onPlayerJoinedRoom(PlayerInfo player) {
-        playerData[player.userID] = createPlayer(playerID: player.userID, location: player.location);
-    }
-
-    public void onPlayerLeftRoom(string userID) {
-        var playerObj = playerData[userID];
->>>>>>> a2b970875aa978ba20bca89d6861e55bf868934c
         Destroy(playerObj);
 
-        playerData.Remove(userID);
+        playerData.Remove(otherPlayer.UserId);
     }
 }
