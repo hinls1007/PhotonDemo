@@ -193,14 +193,16 @@ namespace MultiPlayer
         public string userID;
         public Vector3 location;
         public Quaternion rotation;
+        public Vector3 force;
         public Vector3 currentVelocity;
         public Vector3 currentAngularVelocity;
 
-        public PlayerInfo(string userID, Vector3 location, Quaternion rotation, Vector3 currentVelocity, Vector3 currentAngularVelocity)
+        public PlayerInfo(string userID = "", Vector3 location = new Vector3(), Quaternion rotation = new Quaternion(), Vector3 force = new Vector3(), Vector3 currentVelocity = new Vector3(), Vector3 currentAngularVelocity = new Vector3())
         {
             this.userID = userID;
             this.location = location;
             this.rotation = rotation;
+            this.force = force;
             this.currentVelocity = currentVelocity;
             this.currentAngularVelocity = currentAngularVelocity;
         }
@@ -227,15 +229,17 @@ namespace MultiPlayer
         public string itemTypeID;
         public Vector3 location;
         public Quaternion rotation;
+        public Vector3 force;
         public Vector3 currentVelocity;
         public Vector3 currentAngularVelocity;
 
-        public RoomItem(string itemID, string itemTypeID, Vector3 location = new Vector3(), Quaternion rotation = new Quaternion(), Vector3 currentVelocity = new Vector3(), Vector3 currentAngularVelocity = new Vector3())
+        public RoomItem(string itemID, string itemTypeID, Vector3 location = new Vector3(), Quaternion rotation = new Quaternion(), Vector3 force = new Vector3(), Vector3 currentVelocity = new Vector3(), Vector3 currentAngularVelocity = new Vector3())
         {
             this.itemID = itemID;
             this.itemTypeID = itemTypeID;
             this.location = location;
             this.rotation = rotation;
+            this.force = force;
             this.currentVelocity = currentVelocity;
             this.currentAngularVelocity = currentAngularVelocity;
         }

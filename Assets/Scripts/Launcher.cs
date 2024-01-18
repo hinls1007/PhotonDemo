@@ -2,11 +2,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 using MultiPlayer;
 
 public class Launcher : MonoBehaviour, MultiPlayCallback
 {
+    public CinemachineVirtualCamera camera;
+
+
     public Dictionary<string, Player> playerData = new Dictionary<string, Player>();
     //public Dictionary<string, GameObject> ballData = new Dictionary<string, GameObject>();
     //public Dictionary<Dictionary<int, GameObject>, Dictionary<int, GameObject>>[] playerData;
@@ -15,23 +19,14 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
     public GameObject ballObj;
     public PhotonClientImpl client;
 
+
     private void Start()
     {
         MultiPlayManager.init(client);
         MultiPlayManager.Instance.registerCallback(this);
         MultiPlayManager.Instance.connectServer();
 
-        Debug.Log("Test Json");
-        var json = "{\"userId\":\"0baf6c6a-8dfe-49af-9701-80d174d8f729\",\"velocity\":{\"x\":-0.2058689147233963,\"y\":0.9021569490432739,\"z\":0.1355285346508026},\"angularVelocity\":{\"x\":-0.18757937848567964,\"y\":-0.07084726542234421,\"z\":0.47557929158210757}}";
-        PhotonClientImpl.PlayerMove newObj = JsonUtility.FromJson<PhotonClientImpl.PlayerMove>(json); 
-        //var test = new Test(new Vector3(10, 0, 10));
-        //Debug.Log("Test Json obj Bef " + test.location);
-        //var json = JsonUtility.ToJson(test);
-        //Debug.Log("Test Json obj json" + json);
-        //var newObj = JsonUtility.FromJson<Test>(json);
-        Debug.Log("Test Json new obj json " + newObj.userId);
-        Debug.Log("Test Json new obj json " + newObj.velocity);
-
+        
     }
 
     struct Test
@@ -45,16 +40,7 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
 
     private void FixedUpdate()
     {
-        var userID = MultiPlayManager.Instance.getUserID();
-        if (userID != null
-            && playerData.ContainsKey(userID))
-        {
-            float x = Input.GetAxis("Horizontal");// * 10f * Time.deltaTime;
-            float z = Input.GetAxis("Vertical"); // * 10f * Time.deltaTime;
-            var newLocation = new Vector3(x, 0, z);
-            var localPlayer = playerData[userID];
-            localPlayer.transform.Translate(newLocation);
-        }
+        
     }
 
     public void onConnectedServer()
@@ -65,6 +51,12 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
     public void onRoomJoined(RoomInfo roomInfo) {
         generateGameObj();
         generateBallObj(roomInfo: roomInfo);
+        if (!MultiPlayManager.Instance.isHostPlayer())
+        {
+            Physics.IgnoreLayerCollision(6, 7, true);
+            Physics.IgnoreLayerCollision(6, 6, true);
+            Physics.IgnoreLayerCollision(7, 7, true);
+        }
     }
 
     private void generateGameObj()
@@ -76,20 +68,25 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
         foreach (var player in playerList)
         {
             Debug.Log("generateGameObj : " + player.userID);
-            
+            var playerObj = createPlayer(playerInfo: player);
 
-            playerData[player.userID] = createPlayer(playerID: player.userID, location: player.location);
+            if (MultiPlayManager.Instance.isLocalPlayer(player.userID))
+            {
+                camera.Follow = playerObj.transform;
+                //camera.LookAt = playerObj.transform;
+            }
+            playerData[player.userID] = playerObj;
         }
     }
 
-    private Player createPlayer(string playerID, Vector3 location)
+    private Player createPlayer(PlayerInfo playerInfo)
     {
-        var obj = Instantiate(playerObj, location, new Quaternion());
+        var obj = Instantiate(playerObj, playerInfo.location, new Quaternion());
         var playerScript = obj.GetComponent<Player>();
 
         if (playerScript != null)
         {
-            playerScript.playerID = playerID;
+            playerScript.Init(playerInfo: playerInfo);
         }
         return playerScript;
     }
@@ -136,7 +133,7 @@ public class Launcher : MonoBehaviour, MultiPlayCallback
     }
 
     public void onPlayerJoinedRoom(PlayerInfo player) {
-        playerData[player.userID] = createPlayer(playerID: player.userID, location: player.location);
+        playerData[player.userID] = createPlayer(playerInfo: player);
     }
 
     public void onPlayerLeftRoom(string userID) {
